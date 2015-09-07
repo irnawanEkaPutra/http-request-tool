@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="eventPattern" value="%d{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+	<property name="asyncQueueSize" value="500" />
+	<property name="asyncDiscardingThreshold" value="0" />
+
+	<property name="logHistory" value="7" />
+	
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>
+				%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n
+			</Pattern>
+		</layout>
+	</appender>
+	
+	<appender name="HTTP.REQ"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>logs/http-request-tool.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover without compression -->
+			<fileNamePattern>logs/http-request-tool-%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<!-- keep history base on files count -->
+			<maxHistory>${logHistory}</maxHistory>
+		</rollingPolicy>
+		<!-- The encoding format parser -->
+		<encoder>
+			<pattern>${eventPattern}</pattern>
+		</encoder>
+	</appender>
+	<appender name="ASYNC.HTTP.REQ" class="ch.qos.logback.classic.AsyncAppender">
+		<queueSize>${asyncQueueSize}</queueSize>
+		<discardingThreshold>${asyncDiscardingThreshold}</discardingThreshold>
+		<!-- use this to show line number -->
+		<includeCallerData>true</includeCallerData>
+		<appender-ref ref="HTTP.REQ" />
+	</appender>
+
+	<logger name="com.adskom.utilities" level="debug"
+		additivity="false">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="ASYNC.HTTP.REQ" />
+	</logger>
+
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>
